@@ -1,6 +1,7 @@
-# Matching Kinect Game for Kids
-Andy Kobyljanec
-3/1/2014
+<h1>MatchMe</h1>
+<h2>Matching Kinect Game for Kids</h2>
+Andy Kobyljanec (akobyl)<br>
+Son Phan (sonphanusa)
 
 ## Purpose
 This is a project for our class on Computer Vision.  The purpose of this application is to
