@@ -1,0 +1,16 @@
+﻿<Window x:Class="MatchMe.EndWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EndWindow" Height="768" Width="1024">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="253*"/>
+            <RowDefinition Height="116*"/>
+        </Grid.RowDefinitions>
+        <Image Margin="0,70,0,18.143" Source="Image2.png" Stretch="Fill"/>
+        <Button Content="SHAPE" Name="shapeButton" HorizontalAlignment="Left" Margin="220,28.857,0,0" VerticalAlignment="Top" Width="180" Height="65" FontFamily="Arial" FontSize="32" Background="#FF00B050" Foreground="White" BorderBrush="White" Grid.Row="1"/>
+        <Button Content="COLOR" Name="colorButton" HorizontalAlignment="Left" Margin="620,28.857,0,0" VerticalAlignment="Top" Width="180" Height="65" FontFamily="Arial" FontSize="32" Background="#FF7878DE" Foreground="White" BorderBrush="White" Grid.Row="1"/>
+        <Button Content="Quit" Name="quitButton" HorizontalAlignment="Left" Margin="856,171.857,0,0" VerticalAlignment="Top" Width="150" Height="50" FontFamily="Arial" FontSize="32" Background="#FFFFC000" Foreground="White" BorderBrush="White" Grid.Row="1"/>
+        
+    </Grid>
+</Window>
