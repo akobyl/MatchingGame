@@ -25,7 +25,7 @@ namespace MatchMe
             //Loaded += new RoutedEventHandler(WindowLoaded);
         }
 
-        // WINDOW LOADING CLOSING
+        // WINDOW LOADING
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             if (KinectSensor.KinectSensors.Count > 0)
@@ -72,14 +72,14 @@ namespace MatchMe
         // BUTTONS CLICK
         private void shapeButton_Click(object sender, RoutedEventArgs e)
         {
-            newPlayWindow = new PlayWindow("shape");
+            newPlayWindow = new PlayWindow("shape", sensor);
             newPlayWindow.Show();
             this.Close();
         }
 
         private void colorButton_Click(object sender, RoutedEventArgs e)
         {
-            newPlayWindow = new PlayWindow("color");
+            newPlayWindow = new PlayWindow("color", sensor);
             newPlayWindow.Show();
             this.Close();
         }
@@ -173,19 +173,19 @@ namespace MatchMe
             {
                 case "shape":
                     //go to shape game
-                    newPlayWindow = new PlayWindow("shape");
+                    newPlayWindow = new PlayWindow("shape", sensor);
                     newPlayWindow.Show();
                     this.Close();
                     break;
                 case "color":
                     // go to color game
-                    newPlayWindow = new PlayWindow("color");
+                    newPlayWindow = new PlayWindow("color", sensor);
                     newPlayWindow.Show();
                     this.Close();
                     break;
                 case "both":
                     // go to Easter egg game
-                    newPlayWindow = new PlayWindow("both");
+                    newPlayWindow = new PlayWindow("both", sensor);
                     newPlayWindow.Show();
                     this.Close();
                     break;
