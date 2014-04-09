@@ -23,6 +23,34 @@ namespace MatchMe
         WriteableBitmap colorBitmap;
         byte[] colorPixels;
 
+        public enum colors { red, green, blue, yellow}
+
+        public enum shapes {square, triangle, circle}
+            
+
+        private struct colorObject
+        {
+            public System.Windows.Point center;
+            public Shape shape;
+            public Brush color;
+
+            public bool Touch(System.Windows.Point joint)
+            {
+                double minDxSquared = this.shape.RenderSize.Width;
+                minDxSquared *= minDxSquared;
+
+                double dist = SquaredDistance(joint.X, joint.Y, center.X, center.Y);
+
+                if (dist <= minDxSquared) { return true; }
+                else { return false; }
+            }
+
+            private static double SquaredDistance(double x1, double y1, double x2, double y2)
+            {
+                return ((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1));
+            }
+        }
+
         public PlayWindow(string gameChosen, KinectSensor kinect_sensor)
         {
             InitializeComponent();
@@ -162,7 +190,7 @@ namespace MatchMe
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            this.sensor.Stop();
         }
 
         // open EndWindow when user quits at playing
