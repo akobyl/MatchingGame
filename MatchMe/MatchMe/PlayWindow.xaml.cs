@@ -35,7 +35,8 @@ namespace MatchMe
 
         void skeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            mainCanvas.Children.Clear();
+            //mainCanvas.Children.Clear();
+            ClearSkeleton();
 
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
@@ -55,6 +56,17 @@ namespace MatchMe
                 }
                 DrawSkeleton(skeleton);
             }
+        }
+
+        private void ClearSkeleton()
+        {
+            var childrenToRemove = mainCanvas.Children.OfType<UIElement>().
+                                        Where(c => UIElementExtensions.GetGroupID(c) == 1);
+            foreach(var child in childrenToRemove.ToArray())
+            {
+               mainCanvas.Children.Remove(child);
+            }
+            //statusBar.Text += childrenToRemove.ToString();
         }
 
         private void DrawSkeleton(Skeleton skeleton)
@@ -94,6 +106,7 @@ namespace MatchMe
             bone.X2 = joint2.X;
             bone.Y2 = joint2.Y;
 
+            UIElementExtensions.SetGroupID(bone, 1);
             mainCanvas.Children.Add(bone);
         }
 
@@ -129,6 +142,9 @@ namespace MatchMe
             this.sensor.Stop();     // stop sensor to re-enable componenents needed in play window
 
             this.sensor.SkeletonStream.Enable();
+
+            // draw game frame elements
+            DrawGameFrame(3);
             
             // color image setup
             this.sensor.ColorStream.Enable();
@@ -140,6 +156,8 @@ namespace MatchMe
 
             this.sensor.SkeletonFrameReady += skeletonFrameReady;
             this.sensor.Start();
+
+
 
 
 
@@ -156,6 +174,24 @@ namespace MatchMe
             newEndWindow = new EndWindow();
             newEndWindow.Show();
             this.Close();
+        }
+
+        private void DrawGameFrame(int numberOfBoxes)
+        {
+            for (int i = 1; i < numberOfBoxes; i++)
+            {
+                Line frame = new Line();
+                frame.Stroke = Brushes.Black;
+                frame.StrokeThickness = 2;
+                // add horizontal lines
+                frame.X1 = mainCanvas.Width;
+                frame.Y1 = (mainCanvas.Height / numberOfBoxes) * i;
+                frame.X2 = mainCanvas.Width - 200;
+                frame.Y2 = (mainCanvas.Height / numberOfBoxes) * i;
+
+                UIElementExtensions.SetGroupID(frame, 2);
+                mainCanvas.Children.Add(frame);
+            }
         }
     }
 }
