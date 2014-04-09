@@ -139,6 +139,8 @@ namespace MatchMe
         {
             statusBar.Text = "Play Window initialized";
             statusBar.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
+            title.Content = "Match the " + gameOption + "s!!";
+
             this.sensor.Stop();     // stop sensor to re-enable componenents needed in play window
 
             this.sensor.SkeletonStream.Enable();
@@ -156,11 +158,6 @@ namespace MatchMe
 
             this.sensor.SkeletonFrameReady += skeletonFrameReady;
             this.sensor.Start();
-
-
-
-
-
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -186,7 +183,7 @@ namespace MatchMe
                 // add horizontal lines
                 frame.X1 = mainCanvas.Width;
                 frame.Y1 = (mainCanvas.Height / numberOfBoxes) * i;
-                frame.X2 = mainCanvas.Width - 200;
+                frame.X2 = mainCanvas.Width - 300;
                 frame.Y2 = (mainCanvas.Height / numberOfBoxes) * i;
 
                 UIElementExtensions.SetGroupID(frame, 2);
