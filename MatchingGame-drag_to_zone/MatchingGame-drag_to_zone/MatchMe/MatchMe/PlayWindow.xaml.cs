@@ -1,13 +1,9 @@
-﻿using Microsoft.Kinect;
-using Microsoft.Speech.AudioFormat;
-using Microsoft.Speech.Recognition;
-using System;
-using System.IO;
+﻿using System.Windows;
+using Microsoft.Kinect;
+using System.Windows.Shapes;
 using System.Linq;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace MatchMe
 {
@@ -16,70 +12,21 @@ namespace MatchMe
     /// </summary>
     public partial class PlayWindow : Window
     {
+        EndWindow newEndWindow;
+        string gameOption; // use this to check for which game the player selected
         KinectSensor sensor;
         Skeleton[] totalSkeleton = new Skeleton[6];
         Skeleton skeleton;
-        WriteableBitmap colorBitmap;
-        Stream audioStream;
-        SpeechRecognitionEngine speechEngine;
-        RecognizerInfo recognizerInfo;
-        EndWindow newEndWindow;
-
-        string gameOption; //game player selected
         int currentSkeletonID = 0;
+
+        // image variables
+        WriteableBitmap colorBitmap;
         byte[] colorPixels;
 
-        public enum colors { red, green, blue, yellow }
-        public enum shapes { square, triangle, circle }
+        public enum colors { red, green, blue, yellow}
 
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        {
-            statusBar.Text = "Play Window initialized";
-            statusBar.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
-            title.Content = "Match the " + gameOption + "s!!";
-
-            // stop sensor to add new play window components
-            this.sensor.Stop();
-
-            // draw game frame elements
-            DrawGameFrame(3);
-
-            // color image stream
-            this.sensor.ColorStream.Enable();
-            this.colorPixels = new byte[this.sensor.ColorStream.FramePixelDataLength];
-            this.colorBitmap = new WriteableBitmap(
-                this.sensor.ColorStream.FrameWidth,
-                this.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null
-            );
-            this.image.Source = this.colorBitmap;
-            this.sensor.ColorFrameReady += colorFrameReady;
-
-            // skeleton stream
-            this.sensor.SkeletonStream.Enable();
-            this.sensor.SkeletonFrameReady += skeletonFrameReady;
-            this.sensor.Start();
-
-            // audio stream
-            audioStream = this.sensor.AudioSource.Start();
-            recognizerInfo = GetKinectRecognizer();
-            if (recognizerInfo == null)
-            {
-                MessageBox.Show("Could not find Kinect speech recognizer.");
-                return;
-            }
-            // build grammar for Kinect to recognize
-            BuildGrammarforRecognizer(recognizerInfo);
-        }
-
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // nothing needed
-        }
-
-        private void quitButton_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
+        public enum shapes {square, triangle, circle}
+            
 
         private struct colorObject
         {
@@ -110,13 +57,15 @@ namespace MatchMe
             // gameChosen is passed from MainWindow when it opens this PlayWindow
             // gameChosen will be either "shape", "color", or "both"
             gameOption = gameChosen;
+
             sensor = kinect_sensor;
         }
 
-        private void skeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        void skeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
             //mainCanvas.Children.Clear();
             ClearSkeleton();
+
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
             {
@@ -141,9 +90,9 @@ namespace MatchMe
         {
             var childrenToRemove = mainCanvas.Children.OfType<UIElement>().
                                         Where(c => UIElementExtensions.GetGroupID(c) == 1);
-            foreach (var child in childrenToRemove.ToArray())
+            foreach(var child in childrenToRemove.ToArray())
             {
-                mainCanvas.Children.Remove(child);
+               mainCanvas.Children.Remove(child);
             }
             //statusBar.Text += childrenToRemove.ToString();
         }
@@ -172,7 +121,7 @@ namespace MatchMe
         }
 
         // draw single bone
-        private void drawBone(Joint trackedJoint1, Joint trackedJoint2)
+        void drawBone(Joint trackedJoint1, Joint trackedJoint2)
         {
             Line bone = new Line();
             bone.Stroke = Brushes.Blue;
@@ -196,7 +145,7 @@ namespace MatchMe
         }
 
 
-        private void colorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
+        void colorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
         {
             using (ColorImageFrame imageFrame = e.OpenColorImageFrame())
             {
@@ -211,6 +160,45 @@ namespace MatchMe
                     this.colorPixels, stride, 0);
 
             }
+        }
+
+
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            statusBar.Text = "Play Window initialized";
+            statusBar.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
+            title.Content = "Match the " + gameOption + "s!!";
+
+            this.sensor.Stop();     // stop sensor to re-enable componenents needed in play window
+
+            this.sensor.SkeletonStream.Enable();
+
+            // draw game frame elements
+            DrawGameFrame(3);
+            
+            // color image setup
+            this.sensor.ColorStream.Enable();
+            this.colorPixels = new byte[this.sensor.ColorStream.FramePixelDataLength];
+            this.colorBitmap = new WriteableBitmap(this.sensor.ColorStream.FrameWidth,
+                this.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
+            this.image.Source = this.colorBitmap;
+            this.sensor.ColorFrameReady += colorFrameReady;
+
+            this.sensor.SkeletonFrameReady += skeletonFrameReady;
+            this.sensor.Start();
+        }
+
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.sensor.Stop();
+        }
+
+        // open EndWindow when user quits at playing
+        private void quitButton_Click(object sender, RoutedEventArgs e)
+        {
+            newEndWindow = new EndWindow();
+            newEndWindow.Show();
+            this.Close();
         }
 
         private void DrawGameFrame(int numberOfBoxes)
@@ -229,92 +217,6 @@ namespace MatchMe
                 UIElementExtensions.SetGroupID(frame, 2);
                 mainCanvas.Children.Add(frame);
             }
-        }
-
-        // SPEECH
-        private static RecognizerInfo GetKinectRecognizer()
-        {
-            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
-            {
-                string value;
-                recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
-                if ("True".Equals(value, StringComparison.OrdinalIgnoreCase)
-                    && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return recognizer;
-                }
-            }
-            return null;
-        }
-
-        private void BuildGrammarforRecognizer(RecognizerInfo recognizerInfo)
-        {
-            var grammarBuilder = new GrammarBuilder { Culture = recognizerInfo.Culture };
-            // add more choices
-            var gameOptions = new Choices();
-            gameOptions.Add("quit");
-            // add choices to grammar builder
-            grammarBuilder.Append(gameOptions);
-
-            // Create Grammar from GrammarBuilder
-            var grammar = new Grammar(grammarBuilder);
-
-            // Start the speech recognizer
-            speechEngine = new SpeechRecognitionEngine(recognizerInfo.Id);
-            speechEngine.LoadGrammar(grammar); // loading grammer into recognizer            
-
-            // Attach the speech audio source to the recognizer
-            int samplesPerSecond = 16000; int bitsPerSample = 16;
-            int channels = 1; int averageBytesPerSecond = 32000; int blockAlign = 2;
-            speechEngine.SetInputToAudioStream(
-                 audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm,
-                 samplesPerSecond, bitsPerSample, channels, averageBytesPerSecond,
-                 blockAlign, null)
-            );
-
-            // Register the event handler for speech recognition
-            speechEngine.SpeechRecognized += speechRecognized;
-            speechEngine.SpeechHypothesized += speechHypothesized;
-            speechEngine.SpeechRecognitionRejected += speechRecognitionRejected;
-
-            speechEngine.RecognizeAsync(RecognizeMode.Multiple);
-        }
-
-        private void speechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
-        { }
-
-        private void speechHypothesized(object sender, SpeechHypothesizedEventArgs e)
-        {
-            //wordsTenative.Text = e.Result.Text;
-        }
-
-        private void speechRecognized(object sender, SpeechRecognizedEventArgs e)
-        {
-            //wordsRecognized.Text = e.Result.Text;
-            //confidenceTxt.Text = e.Result.Confidence.ToString();
-            float confidenceThreshold = 0.6f;
-            if (e.Result.Confidence > confidenceThreshold)
-            {
-                CommandsParser(e);
-            }
-        }
-
-        private void CommandsParser(SpeechRecognizedEventArgs e)
-        {
-            string spokenCmd;
-            System.Collections.ObjectModel.ReadOnlyCollection<RecognizedWordUnit> words = e.Result.Words;
-
-            spokenCmd = words[0].Text;
-            switch (spokenCmd)
-            {
-                case "quit":
-                    // exit the game                    
-                    Application.Current.Shutdown();
-                    return;
-                default:
-                    return;
-            }
-
         }
     }
 }

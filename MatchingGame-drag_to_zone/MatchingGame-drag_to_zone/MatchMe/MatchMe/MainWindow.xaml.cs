@@ -4,7 +4,6 @@ using Microsoft.Speech.Recognition;
 using System;
 using System.IO;
 using System.Windows;
-using System.Windows.Threading;
 
 
 namespace MatchMe
@@ -20,16 +19,13 @@ namespace MatchMe
         RecognizerInfo recognizerInfo;
         PlayWindow newPlayWindow;
 
-        // Timer
-        private DispatcherTimer timer = new DispatcherTimer();
-
         public MainWindow()
         {
             InitializeComponent();
             //Loaded += new RoutedEventHandler(WindowLoaded);
         }
 
-        // WINDOW LOADING CLOSING
+        // WINDOW LOADING
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             if (KinectSensor.KinectSensors.Count > 0)
@@ -50,15 +46,12 @@ namespace MatchMe
                     }
                     // build grammar for Kinect to recognize
                     BuildGrammarforRecognizer(recognizerInfo);
-                    statusBar.Text = "Speech Recognizer is NOT ready";
-                    // a quick timer to wait for the speech engine to be ready
-                    // there is no 'engine-ready' function/boolean provided by the SDK API
-                    StartTimer();
+                    statusBar.Text = "Speech Recognizer is ready";
                 }
             }
             else // Kinect not connected
             {
-                MessageBox.Show("The game needs a Kinect sensor.\nPlease make sure your sensor is connected.");
+                MessageBox.Show("Kinect sensor is not connected.");
                 this.Close();
             }
         }
@@ -79,29 +72,22 @@ namespace MatchMe
         // BUTTONS CLICK
         private void shapeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (newPlayWindow == null)
-            {
-                newPlayWindow = new PlayWindow("shape", sensor);
-                newPlayWindow.Show();
-            }
+            newPlayWindow = new PlayWindow("shape", sensor);
+            newPlayWindow.Show();
             this.Close();
         }
 
         private void colorButton_Click(object sender, RoutedEventArgs e)
         {
-            if (newPlayWindow == null)
-            {
-                newPlayWindow = new PlayWindow("color", sensor);
-                newPlayWindow.Show();
-            }
+            newPlayWindow = new PlayWindow("color", sensor);
+            newPlayWindow.Show();
             this.Close();
         }
 
         private void quitButton_Click(object sender, RoutedEventArgs e)
         {
-            //stopKinect();            
-            //this.Close(); is not the right way to shutdown the app
-            Application.Current.Shutdown();
+            stopKinect();
+            this.Close();
         }
 
         // SPEECH
@@ -123,12 +109,14 @@ namespace MatchMe
         private void BuildGrammarforRecognizer(RecognizerInfo recognizerInfo)
         {
             var grammarBuilder = new GrammarBuilder { Culture = recognizerInfo.Culture };
+            // first say 'Hello'
+            grammarBuilder.Append(new Choices("Hello"));
             // add more choices
             var gameOptions = new Choices();
             gameOptions.Add("shape");
             gameOptions.Add("color");
-            gameOptions.Add("both");
             gameOptions.Add("quit");
+            gameOptions.Add("both");
             // add choices to grammar builder
             grammarBuilder.Append(gameOptions);
 
@@ -185,62 +173,31 @@ namespace MatchMe
             {
                 case "shape":
                     //go to shape game
-                    if (newPlayWindow == null)
-                    {
-                        newPlayWindow = new PlayWindow("shape", sensor);
-                        newPlayWindow.Show();
-                    };
+                    newPlayWindow = new PlayWindow("shape", sensor);
+                    newPlayWindow.Show();
                     this.Close();
-                    return;
+                    break;
                 case "color":
                     // go to color game
-                    if (newPlayWindow == null)
-                    {
-                        newPlayWindow = new PlayWindow("color", sensor);
-                        newPlayWindow.Show();
-                    };
+                    newPlayWindow = new PlayWindow("color", sensor);
+                    newPlayWindow.Show();
                     this.Close();
-                    return;
+                    break;
                 case "both":
                     // go to Easter egg game
-                    if (newPlayWindow == null)
-                    {
-                        newPlayWindow = new PlayWindow("both", sensor);
-                        newPlayWindow.Show();
-                    };
+                    newPlayWindow = new PlayWindow("both", sensor);
+                    newPlayWindow.Show();
                     this.Close();
-                    return;
+                    break;
                 case "quit":
-                    // exit the game                    
-                    Application.Current.Shutdown();
-                    return;
+                    // exit the game
+                    stopKinect();
+                    this.Close();
+                    break;
                 default:
                     return;
             }
 
-        }
-
-        // MISC
-        private void StartTimer()
-        {
-            // Start timer
-            timer.Interval = new TimeSpan(0, 0, 3);
-            timer.Tick += timer_Tick;
-            timer.Start();
-        }
-
-        private void StopTimer()
-        {
-            timer.Stop();
-            timer.Tick -= timer_Tick;
-        }
-
-        private void timer_Tick(object sender, System.EventArgs e)
-        {
-            // Re-enable buttons
-            statusBar.Text = "Speech Recognizer is READY";
-            // Stop timer
-            StopTimer();
         }
     }
 }
