@@ -1,0 +1,191 @@
+﻿using Microsoft.Kinect;
+using System.Windows;
+
+
+namespace MatchMe
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class EndWindow : Window
+    {
+        KinectSensor sensor;
+        PlayWindow newPlayWindow;
+
+        public EndWindow(KinectSensor kinect_sensor)
+        {
+            InitializeComponent();
+            //Loaded += new RoutedEventHandler(WindowLoaded);
+            sensor = kinect_sensor;
+        }
+
+        // WINDOW LOADING CLOSING
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // do nothing here because we don't want to stop the sensor when going to new window
+        }
+
+        private void stopKinect() // use this to stop the Kinect
+        {
+            if (this.sensor != null && this.sensor.IsRunning) // if Kinect's running
+            {
+                this.sensor.Stop(); // stop the sensor
+            }
+        }
+
+        // BUTTONS CLICK
+        private void shapeButton_Click(object sender, RoutedEventArgs e)
+        {
+<<<<<<< HEAD
+            newPlayWindow = new PlayWindow("shape", sensor);
+            newPlayWindow.Show();
+=======
+            if (newPlayWindow == null)
+            {
+                newPlayWindow = new PlayWindow("shape", sensor);
+                newPlayWindow.Show();
+            }
+>>>>>>> d4cf27623ebf160864ecaadb0c070e5956f710d0
+            this.Close();
+        }
+
+        private void colorButton_Click(object sender, RoutedEventArgs e)
+        {
+<<<<<<< HEAD
+            newPlayWindow = new PlayWindow("color", sensor);
+            newPlayWindow.Show();
+            this.Close();
+        }
+
+        private void quitButton_Click(object sender, RoutedEventArgs e)
+        {
+            stopKinect();
+            this.Close();
+        }
+
+        // SPEECH
+        private static RecognizerInfo GetKinectRecognizer()
+        {
+            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+=======
+            if (newPlayWindow == null)
+>>>>>>> d4cf27623ebf160864ecaadb0c070e5956f710d0
+            {
+                newPlayWindow = new PlayWindow("color", sensor);
+                newPlayWindow.Show();
+            }
+            this.Close();
+        }
+
+        private void quitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+<<<<<<< HEAD
+        private void CommandsParser(SpeechRecognizedEventArgs e)
+        {
+            string spokenCmd;
+            System.Collections.ObjectModel.ReadOnlyCollection<RecognizedWordUnit> words = e.Result.Words;
+
+            spokenCmd = words[0].Text;
+            switch (spokenCmd)
+            {
+                case "shape":
+                    //go to shape game
+                    newPlayWindow = new PlayWindow("shape", sensor);
+                    newPlayWindow.Show();
+                    this.Close();
+                    break;
+                case "color":
+                    // go to color game
+                    newPlayWindow = new PlayWindow("color", sensor);
+                    newPlayWindow.Show();
+                    this.Close();
+                    break;
+                case "both":
+                    // go to Easter egg game
+                    newPlayWindow = new PlayWindow("both", sensor);
+                    newPlayWindow.Show();
+                    this.Close();
+                    break;
+                case "quit":
+                    // exit the game
+                    stopKinect();
+                    this.Close();
+                    break;
+                default:
+                    return;
+            }
+
+            /*var result = e.Result;
+            Color objectColor;
+            Shape drawObject;
+            System.Collections.ObjectModel.ReadOnlyCollection<RecognizedWordUnit> words = e.Result.Words;
+            
+            if (words[0].Text == "draw")
+            {
+                string colorObject = words[1].Text;
+                switch (colorObject)
+                {
+                    case "red": objectColor = Colors.Red;
+                        break;
+                    case "green": objectColor = Colors.Green;
+                        break;
+                    case "blue": objectColor = Colors.Blue;
+                        break;
+                    case "yellow": objectColor = Colors.Yellow;
+                        break;
+                    case "gray": objectColor = Colors.Gray;
+                        break;
+                    default:
+                        return;
+                }
+
+                var shapeString = words[2].Text;
+                switch (shapeString)
+                {
+                    case "circle":
+                        drawObject = new Ellipse();
+                        drawObject.Width = 100; drawObject.Height = 100;
+                        break;
+                    case "square":
+                        drawObject = new Rectangle();
+                        drawObject.Width = 100; drawObject.Height = 100;
+                        break;
+                    case "rectangle":
+                        drawObject = new Rectangle();
+                        drawObject.Width = 100; drawObject.Height = 60;
+                        break;
+                    case "triangle":
+                        var polygon = new Polygon();
+                        polygon.Points.Add(new Point(0, 30));
+                        polygon.Points.Add(new Point(-60, -30));
+                        polygon.Points.Add(new Point(60, -30));
+                        drawObject = polygon;
+                        break;
+                    default:
+                        return;
+                }
+
+                canvas1.Children.Clear();
+                drawObject.SetValue(Canvas.LeftProperty, 80.0);
+                drawObject.SetValue(Canvas.TopProperty, 80.0);
+                drawObject.Fill = new SolidColorBrush(objectColor);
+                canvas1.Children.Add(drawObject);
+            }
+
+            if (words[0].Text == "close" && words[1].Text == "the" && words[2].Text == "application")
+            {
+                this.Close();
+            }*/
+        }
+=======
+>>>>>>> d4cf27623ebf160864ecaadb0c070e5956f710d0
+    }
+}

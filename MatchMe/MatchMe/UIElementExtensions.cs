@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
-
 // From: http://stackoverflow.com/questions/4479532/adding-and-removing-wpf-uielements-at-runtime
-
 
 namespace MatchMe
 {
