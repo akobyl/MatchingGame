@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Controls;
-
+using System.Collections.Generic;
 
 
 
@@ -34,10 +34,10 @@ namespace MatchMe
         // Object array for matching
         colorObject[] testobject;
         public enum colors { red, green, blue, yellow }
-        public enum shapes { square, triangle, circle }
+        public enum shapes { square, circle }
         int object_id = 0;
-
-
+        int TEST_LENGTH = 10;
+        Random random = new Random();
 
         string gameOption; //game player selected
         int currentSkeletonID = 0;
@@ -55,6 +55,9 @@ namespace MatchMe
 
             // draw game frame elements
             DrawGameFrame(3);
+
+            // build test objects
+            BuildTestObjects();
 
             // color image stream
             this.sensor.ColorStream.Enable();
@@ -81,7 +84,11 @@ namespace MatchMe
             }
             // build grammar for Kinect to recognize
             BuildGrammarforRecognizer(recognizerInfo);
+
+
         }
+
+
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -94,30 +101,6 @@ namespace MatchMe
         }
 
 
-        // Color object code
-        private struct colorObject
-        {
-            public System.Windows.Point center;
-            public Shape shape;
-            public Brush color;
-
-            // determine if the object is being grabbed by a hand
-            public bool Touch(System.Windows.Point joint)
-            {
-                double minDxSquared = this.shape.RenderSize.Width;
-                minDxSquared *= minDxSquared;
-
-                double dist = SquaredDistance(joint.X, joint.Y, center.X, center.Y);
-
-                if (dist <= minDxSquared) { return true; }
-                else { return false; }
-            }
-
-            private static double SquaredDistance(double x1, double y1, double x2, double y2)
-            {
-                return ((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1));
-            }
-        }
 
         public PlayWindow(string gameChosen, KinectSensor kinect_sensor)
         {
@@ -246,6 +229,59 @@ namespace MatchMe
             }
         }
 
+        private void BuildTestObjects()
+        {
+            string status;
+            statusBar.Text += "creating test objects\n";
+
+            // set up array of color objects
+            this.testobject = new colorObject[TEST_LENGTH];
+
+            for(int i=0; i<TEST_LENGTH; i++)
+            {
+                // Total number of enum elements: http://stackoverflow.com/questions/856154/total-number-of-items-defined-in-an-enum
+                colors color = (colors)random.Next(0, Enum.GetNames(typeof(colors)).Length);       // get a random color
+                shapes shape = (shapes)random.Next(0, Enum.GetNames(typeof(shapes)).Length);       // get a random shape
+
+
+                if(shape == shapes.circle)
+                        testobject[i].shape = new Ellipse();
+                if(shape == shapes.square)
+                        testobject[i].shape = new Rectangle();
+
+  
+
+                if(color == colors.red)
+                        testobject[i].shape.Fill = Brushes.Red;
+                if(color == colors.blue)
+                        testobject[i].shape.Fill = Brushes.Blue;
+                if(color == colors.green)
+                        testobject[i].shape.Fill = Brushes.Green;
+                if(color == colors.yellow)
+                        testobject[i].shape.Fill = Brushes.Yellow;
+
+      
+
+
+                // TODO: add different sizes
+                testobject[i].shape.Width = 100;
+                testobject[i].shape.Height = 100;
+
+                testobject[i].center.X = random.Next(0,(int)mainCanvas.Width);
+                testobject[i].center.Y = random.Next(0, (int)mainCanvas.Height);
+
+                //UIElementExtensions.SetGroupID(testobject[object_id].shape, 3);
+
+                Canvas.SetTop(testobject[i].shape, testobject[i].center.Y);
+                Canvas.SetLeft(testobject[i].shape, testobject[i].center.X);
+
+ 
+            }
+
+            statusBar.Text += "test objects created\n";
+        }
+
+
         // SPEECH
         private static RecognizerInfo GetKinectRecognizer()
         {
@@ -335,18 +371,14 @@ namespace MatchMe
         // Test function to add random object on click
         private void add_click(object sender, RoutedEventArgs e)
         {
-            testobject[object_id].shape = new Ellipse();
-            testobject[object_id].shape.Width = 40;
-            testobject[object_id].shape.Height = 40;
-            testobject[object_id].shape.Fill = Brushes.Red;
-            testobject[object_id].center.X = 300;
-            testobject[object_id].center.Y = 500;
-            
-            UIElementExtensions.SetGroupID(testobject[object_id].shape, 3);
-            
             mainCanvas.Children.Add(testobject[object_id].shape);
-            Canvas.SetTop(testobject[object_id].shape, testobject[object_id].center.Y);
-            Canvas.SetLeft(testobject[object_id].shape, testobject[object_id].center.X);
+
+            if (object_id < TEST_LENGTH - 1)
+            { object_id++; }
+            else
+            {
+                button_add_shape.IsEnabled = false;
+            }
         }
     }
 }

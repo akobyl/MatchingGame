@@ -7,7 +7,7 @@
     <Grid RenderTransformOrigin="0.104,0.95">
         <Canvas Name="mainCanvas" HorizontalAlignment="Left" Height="718" Margin="10,10,0,0" VerticalAlignment="Top" Width="996">
             <Label Name="title" Content="title" Canvas.Left="213" Canvas.Top="10" Height="76" Width="686" FontSize="48" FontFamily="Segoe UI Semibold"/>
-            <Button Click="add_click" Content="Add shape" Canvas.Left="443" Canvas.Top="622" Width="75"/>
+            <Button Name ="button_add_shape" Click="add_click" Content="Add shape" Canvas.Left="443" Canvas.Top="622" Width="75"/>
         </Canvas>
         <TextBox Name="statusBar" TextWrapping="Wrap" Text="TextBox" Canvas.Top="695" Margin="0,678,204,2"/>
         <Image Name="image" Margin="10,10,842,615"/>
