@@ -25,18 +25,18 @@ namespace MatchMe
         Stream audioStream;
         SpeechRecognitionEngine speechEngine;
         RecognizerInfo recognizerInfo;
-        //EndWindow newEndWindow;
+        EndWindow newEndWindow;
 
         // Drop zone objects
-        dropObject[] drop_object;
-        int NUM_DROP_OBJ = 3;
+        //dropObject[] drop_object;
+        //int NUM_DROP_OBJ = 3;
 
         // Object array for matching
         colorObject[] testObjects;
         public enum colors { red, green, blue }
         public enum shapes { square, circle }
         int object_id = -1;
-        int TEST_LENGTH = 10;
+        int TEST_LENGTH = 3;
         Random random = new Random();
 
         // Match boxes hit detection
@@ -146,7 +146,6 @@ namespace MatchMe
 
                 resultZones[i].center.X = (int)((resultZones[i].X1 + resultZones[i].X2) / 2);
                 resultZones[i].center.Y = (int)((resultZones[i].Y1 + resultZones[i].Y2) / 2);
-
             }
 
             Line frameV = new Line();
@@ -320,6 +319,9 @@ namespace MatchMe
             else
             {
                 this.finished = true;
+                // reset and clear all <-- important 
+                object_id = 0;
+                mainCanvas.Children.Clear();
             }
 
             return this.finished;
@@ -382,6 +384,14 @@ namespace MatchMe
                             if (drawNextObject()) //if finished
                             {
                                 title.Content = "Finished!";
+                                // launch ending screen
+                                if (newEndWindow == null)
+                                {
+                                    newEndWindow = new EndWindow(sensor);
+                                    newEndWindow.Show();
+                                };
+                                // close this play window
+                                this.Close();
                             }
                         }
                     }
