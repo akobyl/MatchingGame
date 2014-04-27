@@ -27,7 +27,7 @@ namespace MatchMe
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // do nothing here because we don't want to stop the sensor when going to new window
+            //do nothing
         }
 
         private void stopKinect() // use this to stop the Kinect
@@ -61,6 +61,7 @@ namespace MatchMe
 
         private void quitButton_Click(object sender, RoutedEventArgs e)
         {
+            stopKinect();
             Application.Current.Shutdown();
         }
 

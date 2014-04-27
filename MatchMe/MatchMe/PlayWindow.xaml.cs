@@ -5,9 +5,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+
 
 namespace MatchMe
 {
@@ -23,26 +25,57 @@ namespace MatchMe
         Stream audioStream;
         SpeechRecognitionEngine speechEngine;
         RecognizerInfo recognizerInfo;
-        EndWindow newEndWindow;
+        //EndWindow newEndWindow;
+
+        // Drop zone objects
+        dropObject[] drop_object;
+        int NUM_DROP_OBJ = 3;
+
+        // Object array for matching
+        colorObject[] testObjects;
+        public enum colors { red, green, blue }
+        public enum shapes { square, circle }
+        int object_id = -1;
+        int TEST_LENGTH = 10;
+        Random random = new Random();
+
+        // Match boxes hit detection
+        resultZone[] resultZones;
+        bool finished = false;
 
         string gameOption; //game player selected
         int currentSkeletonID = 0;
         byte[] colorPixels;
 
-        public enum colors { red, green, blue, yellow }
-        public enum shapes { square, triangle, circle }
+        public PlayWindow(string gameChosen, KinectSensor kinect_sensor)
+        {
+            InitializeComponent();
+            // gameChosen is passed from MainWindow when it opens this PlayWindow
+            // gameChosen will be either "shape", "color", or "both"
+            gameOption = gameChosen;
+            sensor = kinect_sensor;
+        }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             statusBar.Text = "Play Window initialized";
             statusBar.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
-            title.Content = "Match the " + gameOption + "s!!";
+            title.Content = "Match the " + gameOption + "s!";
 
             // stop sensor to add new play window components
-            this.sensor.Stop();
+            stopKinect();
 
             // draw game frame elements
             DrawGameFrame(3);
+
+            // draw drop zone elements
+            //DrawDropZone();
+
+            // build test objects
+            BuildTestObjects();
+
+            // add the first object to play
+            drawNextObject();
 
             // color image stream
             this.sensor.ColorStream.Enable();
@@ -76,46 +109,230 @@ namespace MatchMe
             // nothing needed
         }
 
+        private void stopKinect() // use this to stop the Kinect
+        {
+            if (this.sensor != null && this.sensor.IsRunning) // if Kinect's running
+            {
+                this.sensor.Stop(); // stop the sensor
+            }
+        }
+
+        private void DrawGameFrame(int numberOfBoxes)
+        {
+            int frame_width = 300;
+            this.resultZones = new resultZone[numberOfBoxes];
+
+            for (int i = 0; i < numberOfBoxes; i++)
+            {
+                Line frameH = new Line();
+                frameH.Stroke = Brushes.Black;
+                frameH.StrokeThickness = 3;
+
+                // add horizontal lines
+                frameH.X1 = mainCanvas.Width - frame_width;
+                frameH.Y1 = (mainCanvas.Height / numberOfBoxes) * i;
+                frameH.X2 = mainCanvas.Width;
+                frameH.Y2 = (mainCanvas.Height / numberOfBoxes) * i;
+
+                UIElementExtensions.SetGroupID(frameH, 2);
+                mainCanvas.Children.Add(frameH);
+
+                // create resultZone boundaries
+                resultZones[i].X1 = (int)frameH.X1;
+                resultZones[i].X2 = (int)frameH.X2;
+
+                resultZones[i].Y1 = (int)((mainCanvas.Height / numberOfBoxes) * i);
+                resultZones[i].Y2 = (int)((mainCanvas.Height / numberOfBoxes) * (i + 1));
+
+                resultZones[i].center.X = (int)((resultZones[i].X1 + resultZones[i].X2) / 2);
+                resultZones[i].center.Y = (int)((resultZones[i].Y1 + resultZones[i].Y2) / 2);
+
+            }
+
+            Line frameV = new Line();
+            frameV.Stroke = Brushes.Black;
+            frameV.StrokeThickness = 2;
+            // add vertical line
+            frameV.X1 = mainCanvas.Width - frame_width;
+            frameV.Y1 = mainCanvas.Height;
+            frameV.X2 = mainCanvas.Width - frame_width;
+            frameV.Y2 = 0;
+
+            UIElementExtensions.SetGroupID(frameV, 2);
+            mainCanvas.Children.Add(frameV);
+
+            // Draw color or shape matching shapes
+            if (gameOption == "color")
+            {
+                for (int i = 0; i < resultZones.Length; i++)
+                {
+                    Ellipse colorCircle = new Ellipse();
+                    int size = 50;
+                    colorCircle.Height = size;
+                    colorCircle.Width = size;
+                    colorCircle.Stroke = Brushes.Black;
+                    colorCircle.StrokeThickness = 2;
+
+                    // TODO: create colors programmically
+                    if (i == 0)
+                    {
+                        colorCircle.Fill = Brushes.Red;
+                    }
+                    if (i == 1)
+                    {
+                        colorCircle.Fill = Brushes.Blue;
+                    }
+                    if (i == 2)
+                    {
+                        colorCircle.Fill = Brushes.Green;
+                    }
+
+                    Canvas.SetTop(colorCircle, resultZones[i].center.Y - size / 2);
+                    Canvas.SetLeft(colorCircle, resultZones[i].center.X - size / 2);
+
+                    UIElementExtensions.SetGroupID(colorCircle, 2);
+                    mainCanvas.Children.Add(colorCircle);
+                }
+            }
+        }
+
+        /*private void DrawDropZone()
+        {
+            // Create drop objects
+            this.drop_object = new dropObject[NUM_DROP_OBJ];
+            //Red Circle
+            drop_object[0].shape = new Ellipse();
+            drop_object[0].shape.Width = 140;
+            drop_object[0].shape.Height = 140;
+            drop_object[0].shape.Fill = Brushes.Red;
+            //Green Square
+            drop_object[1].shape = new Rectangle();
+            drop_object[1].shape.Width = 140;
+            drop_object[1].shape.Height = 140;
+            drop_object[1].shape.Fill = Brushes.Green;
+            //Blue Triangle
+            var triangle = new Polygon();
+            triangle.Points.Add(new Point(70, 30));
+            triangle.Points.Add(new Point(0, 150));
+            triangle.Points.Add(new Point(140, 150));
+            drop_object[2].shape = triangle;
+            drop_object[2].shape.Fill = Brushes.Blue;
+
+            // Place drop objects into drop zone            
+            //Set positions and properties
+            drop_object[0].shape.SetValue(Canvas.LeftProperty, 25.0);
+            drop_object[0].shape.SetValue(Canvas.TopProperty, 30.0);
+
+            drop_object[1].shape.SetValue(Canvas.LeftProperty, 25.0);
+            drop_object[1].shape.SetValue(Canvas.TopProperty, 200.0);
+
+            drop_object[2].shape.SetValue(Canvas.LeftProperty, 25.0);
+            drop_object[2].shape.SetValue(Canvas.TopProperty, 350.0);
+            //Add to canvas
+            UIElementExtensions.SetGroupID(drop_object[0].shape, 2);
+            UIElementExtensions.SetGroupID(drop_object[1].shape, 2);
+            UIElementExtensions.SetGroupID(drop_object[2].shape, 2);
+            mainCanvas.Children.Add(drop_object[0].shape);
+            mainCanvas.Children.Add(drop_object[1].shape);
+            mainCanvas.Children.Add(drop_object[2].shape);
+        }*/
+
+        private void BuildTestObjects()
+        {
+            //string status;
+            statusBar.Text += "creating test objects\n";
+
+            // set up array of color objects
+            this.testObjects = new colorObject[TEST_LENGTH];
+            //this.testObjects = new List<colorObject>();
+
+            // define box where objects can appear
+            int minX = 100;
+            int maxX = 400;
+            int minY = 100;
+            int maxY = 400;
+
+            for (int i = 0; i < TEST_LENGTH; i++)
+            {
+                // Total number of enum elements: http://stackoverflow.com/questions/856154/total-number-of-items-defined-in-an-enum
+                colors color = (colors)random.Next(0, Enum.GetNames(typeof(colors)).Length);       // get a random color
+                shapes shape = (shapes)random.Next(0, Enum.GetNames(typeof(shapes)).Length);       // get a random shape
+
+                if (shape == shapes.circle)
+                    testObjects[i].shape = new Ellipse();
+                if (shape == shapes.square)
+                    testObjects[i].shape = new Rectangle();
+
+                if (color == colors.red)
+                    testObjects[i].shape.Fill = Brushes.Red;
+                if (color == colors.blue)
+                    testObjects[i].shape.Fill = Brushes.Blue;
+                if (color == colors.green)
+                    testObjects[i].shape.Fill = Brushes.Green;
+                //if (color == colors.yellow)
+                //    testObjects[i].shape.Fill = Brushes.Yellow;
+
+
+                // TODO: add different sizes
+                testObjects[i].size = 100;
+                testObjects[i].shape.Width = testObjects[i].size;
+                testObjects[i].shape.Height = testObjects[i].size;
+
+                testObjects[i].center.X = random.Next(minX, maxX);
+                testObjects[i].center.Y = random.Next(minY, maxY);
+
+                //UIElementExtensions.SetGroupID(testObjects[object_id].shape, 3);
+
+                Canvas.SetTop(testObjects[i].shape, testObjects[i].center.Y);
+                Canvas.SetLeft(testObjects[i].shape, testObjects[i].center.X);
+
+                testObjects[i].shape.Stroke = Brushes.Black;
+                testObjects[i].shape.StrokeThickness = 2;
+
+            }
+
+            statusBar.Text += "test objects created\n";
+        }
+
+        // Test function to add random object on click
+        private void add_click(object sender, RoutedEventArgs e)
+        {
+            object_id++;
+
+            if (object_id < TEST_LENGTH)
+            {
+                mainCanvas.Children.Add(testObjects[object_id].shape);
+            }
+            else
+            {
+                button_add_shape.IsEnabled = false;
+            }
+        }
+
+        private bool drawNextObject()
+        {
+            object_id++;
+
+            if (object_id < TEST_LENGTH)
+            {
+                mainCanvas.Children.Add(testObjects[object_id].shape);
+            }
+            else
+            {
+                this.finished = true;
+            }
+
+            return this.finished;
+        }
+
         private void quitButton_Click(object sender, RoutedEventArgs e)
         {
+            stopKinect();
             Application.Current.Shutdown();
-        }
-
-        private struct colorObject
-        {
-            public System.Windows.Point center;
-            public Shape shape;
-            public Brush color;
-
-            public bool Touch(System.Windows.Point joint)
-            {
-                double minDxSquared = this.shape.RenderSize.Width;
-                minDxSquared *= minDxSquared;
-
-                double dist = SquaredDistance(joint.X, joint.Y, center.X, center.Y);
-
-                if (dist <= minDxSquared) { return true; }
-                else { return false; }
-            }
-
-            private static double SquaredDistance(double x1, double y1, double x2, double y2)
-            {
-                return ((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1));
-            }
-        }
-
-        public PlayWindow(string gameChosen, KinectSensor kinect_sensor)
-        {
-            InitializeComponent();
-            // gameChosen is passed from MainWindow when it opens this PlayWindow
-            // gameChosen will be either "shape", "color", or "both"
-            gameOption = gameChosen;
-            sensor = kinect_sensor;
         }
 
         private void skeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            //mainCanvas.Children.Clear();
             ClearSkeleton();
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
@@ -135,6 +352,42 @@ namespace MatchMe
                 }
                 DrawSkeleton(skeleton);
             }
+
+            // Determine if the current test object is touching the right hand, if it is make the object follow the hand
+            Point RightHandPoint = ScalePosition(skeleton.Joints[JointType.HandRight].Position);
+
+            if (object_id < TEST_LENGTH && testObjects[object_id].Touch(RightHandPoint))
+            {
+                testObjects[object_id].center.X = RightHandPoint.X;
+                testObjects[object_id].center.Y = RightHandPoint.Y;
+
+                Canvas.SetTop(testObjects[object_id].shape, testObjects[object_id].center.Y - testObjects[object_id].size / 2);
+                Canvas.SetLeft(testObjects[object_id].shape, testObjects[object_id].center.X - testObjects[object_id].size / 2);
+
+                //this.statusBar.Text += "grabbed!\n";
+
+                // Determine of the current test object is in the zone
+                if (!this.finished) //if not finished
+                {
+                    for (int i = 0; i < resultZones.Length; i++)
+                    {
+                        if (resultZones[i].inZone(testObjects[object_id].center))
+                        {
+                            this.statusBar.Text += "in Zone: " + i.ToString() + "\n";
+                            testObjects[object_id].center = resultZones[i].center;
+
+                            Canvas.SetTop(testObjects[object_id].shape, testObjects[object_id].center.Y - testObjects[object_id].size / 2);
+                            Canvas.SetLeft(testObjects[object_id].shape, testObjects[object_id].center.X - testObjects[object_id].size / 2);
+
+                            if (drawNextObject()) //if finished
+                            {
+                                title.Content = "Finished!";
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         private void ClearSkeleton()
@@ -189,12 +442,20 @@ namespace MatchMe
             mainCanvas.Children.Add(bone);
         }
 
+        // Skeleton scale code inspired by: http://social.msdn.microsoft.com/Forums/en-US/b71f7719-88bc-44c3-ab3c-76d3cf24cc94/kinectsdk-convert-skeleton-point-to-screen-point?forum=kinectsdknuiapi
         private Point ScalePosition(SkeletonPoint skeletonPoint)
         {
-            DepthImagePoint depthPoint = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution320x240Fps30);
-            return new Point(depthPoint.X, depthPoint.Y);
-        }
+            double scale = mainCanvas.Height / 480.0;
+            double x_offset = 0;// mainCanvas.Width - (640.0 * scale) / 2;
 
+            DepthImagePoint depthPoint = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
+
+            Point point = new Point();
+            point.X = x_offset + (scale * depthPoint.X);
+            point.Y = (scale * depthPoint.Y);
+
+            return new Point(x_offset + (scale * depthPoint.X), (scale * depthPoint.Y));
+        }
 
         private void colorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
         {
@@ -210,24 +471,6 @@ namespace MatchMe
                     new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
                     this.colorPixels, stride, 0);
 
-            }
-        }
-
-        private void DrawGameFrame(int numberOfBoxes)
-        {
-            for (int i = 1; i < numberOfBoxes; i++)
-            {
-                Line frame = new Line();
-                frame.Stroke = Brushes.Black;
-                frame.StrokeThickness = 2;
-                // add horizontal lines
-                frame.X1 = mainCanvas.Width;
-                frame.Y1 = (mainCanvas.Height / numberOfBoxes) * i;
-                frame.X2 = mainCanvas.Width - 300;
-                frame.Y2 = (mainCanvas.Height / numberOfBoxes) * i;
-
-                UIElementExtensions.SetGroupID(frame, 2);
-                mainCanvas.Children.Add(frame);
             }
         }
 
@@ -309,6 +552,7 @@ namespace MatchMe
             {
                 case "quit":
                     // exit the game                    
+                    stopKinect();
                     Application.Current.Shutdown();
                     return;
                 default:
@@ -316,5 +560,6 @@ namespace MatchMe
             }
 
         }
+
     }
 }
