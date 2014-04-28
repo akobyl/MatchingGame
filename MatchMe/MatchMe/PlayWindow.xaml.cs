@@ -28,8 +28,8 @@ namespace MatchMe
         EndWindow newEndWindow;
 
         // Drop zone objects
-        //dropObject[] drop_object;
-        //int NUM_DROP_OBJ = 3;
+        dropObject[] drop_object;
+        int NUM_DROP_OBJ = 3;
 
         // Object array for matching
         colorObject[] testObjects;
@@ -69,7 +69,7 @@ namespace MatchMe
             DrawGameFrame(3);
 
             // draw drop zone elements
-            //DrawDropZone();
+            DrawDropZone();
 
             // build test objects
             BuildTestObjects();
@@ -125,7 +125,7 @@ namespace MatchMe
             for (int i = 0; i < numberOfBoxes; i++)
             {
                 Line frameH = new Line();
-                frameH.Stroke = Brushes.Black;
+                frameH.Stroke = Brushes.LightGray;
                 frameH.StrokeThickness = 3;
 
                 // add horizontal lines
@@ -149,7 +149,7 @@ namespace MatchMe
             }
 
             Line frameV = new Line();
-            frameV.Stroke = Brushes.Black;
+            frameV.Stroke = Brushes.LightGray;
             frameV.StrokeThickness = 2;
             // add vertical line
             frameV.X1 = mainCanvas.Width - frame_width;
@@ -160,7 +160,7 @@ namespace MatchMe
             UIElementExtensions.SetGroupID(frameV, 2);
             mainCanvas.Children.Add(frameV);
 
-            // Draw color or shape matching shapes
+            /*/ Draw color or shape matching shapes
             if (gameOption == "color")
             {
                 for (int i = 0; i < resultZones.Length; i++)
@@ -169,7 +169,7 @@ namespace MatchMe
                     int size = 50;
                     colorCircle.Height = size;
                     colorCircle.Width = size;
-                    colorCircle.Stroke = Brushes.Black;
+                    colorCircle.Stroke = Brushes.LightGray;
                     colorCircle.StrokeThickness = 2;
 
                     // TODO: create colors programmically
@@ -192,10 +192,11 @@ namespace MatchMe
                     UIElementExtensions.SetGroupID(colorCircle, 2);
                     mainCanvas.Children.Add(colorCircle);
                 }
-            }
+            }*/
         }
 
-        /*private void DrawDropZone()
+        // Drop zone based objects
+        private void DrawDropZone()
         {
             // Create drop objects
             this.drop_object = new dropObject[NUM_DROP_OBJ];
@@ -219,13 +220,16 @@ namespace MatchMe
 
             // Place drop objects into drop zone            
             //Set positions and properties
-            drop_object[0].shape.SetValue(Canvas.LeftProperty, 25.0);
-            drop_object[0].shape.SetValue(Canvas.TopProperty, 30.0);
+            //drop_object[0].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
+            drop_object[0].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
+            drop_object[0].shape.SetValue(Canvas.TopProperty, 20.0);
 
-            drop_object[1].shape.SetValue(Canvas.LeftProperty, 25.0);
+            //drop_object[1].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
+            drop_object[1].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
             drop_object[1].shape.SetValue(Canvas.TopProperty, 200.0);
 
-            drop_object[2].shape.SetValue(Canvas.LeftProperty, 25.0);
+            //drop_object[2].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
+            drop_object[2].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
             drop_object[2].shape.SetValue(Canvas.TopProperty, 350.0);
             //Add to canvas
             UIElementExtensions.SetGroupID(drop_object[0].shape, 2);
@@ -234,7 +238,7 @@ namespace MatchMe
             mainCanvas.Children.Add(drop_object[0].shape);
             mainCanvas.Children.Add(drop_object[1].shape);
             mainCanvas.Children.Add(drop_object[2].shape);
-        }*/
+        }
 
         private void BuildTestObjects()
         {
