@@ -1,7 +1,7 @@
 ﻿<Window x:Class="MatchMe.EndWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="EndWindow" Height="768" Width="1024">
+        Title="MatchMe - YOU DID IT!" Height="768" Width="1024" Loaded="WindowLoaded" Closing="WindowClosing" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="logo_small.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="253*"/>

@@ -33,13 +33,11 @@ namespace MatchMe
         // WINDOW LOADING CLOSING
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            /*this.sensor.AudioSource.Stop();
-
             // stop sensor to add new play window components
             stopKinect();
 
             // start the sensor
-            this.sensor.Start();*/
+            this.sensor.Start();
 
             // start audio stream to listen to voice
             audioStream = this.sensor.AudioSource.Start();
@@ -51,15 +49,15 @@ namespace MatchMe
             }
             // build grammar for Kinect to recognize
             BuildGrammarforRecognizer(recognizerInfo);
-            //statusBar.Text = "Speech Recognizer is NOT ready";
+            statusBar.Text = "Speech Recognizer is NOT ready";
             // a quick timer to wait for the speech engine to be ready
             // there is no 'engine-ready' function/boolean provided by the SDK API
-            //StartTimer();
+            StartTimer();
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // do nothing here because we don't want to stop the sensor when going to new window
+            // do nothing here because we don't want to stop the sensor when going to new window            
         }
 
         private void stopKinect() // use this to stop the Kinect
@@ -133,14 +131,14 @@ namespace MatchMe
             speechEngine = new SpeechRecognitionEngine(recognizerInfo.Id);
             speechEngine.LoadGrammar(grammar); // loading grammer into recognizer            
 
-            /*/ Attach the speech audio source to the recognizer
+            // Attach the speech audio source to the recognizer
             int samplesPerSecond = 16000; int bitsPerSample = 16;
             int channels = 1; int averageBytesPerSecond = 32000; int blockAlign = 2;
             speechEngine.SetInputToAudioStream(
                  audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm,
                  samplesPerSecond, bitsPerSample, channels, averageBytesPerSecond,
                  blockAlign, null)
-            );*/
+            );
 
             // Register the event handler for speech recognition
             speechEngine.SpeechRecognized += speechRecognized;
@@ -215,7 +213,7 @@ namespace MatchMe
 
         }
 
-        /*/ MISC
+        // MISC
         private void StartTimer()
         {
             // Start timer
@@ -236,6 +234,6 @@ namespace MatchMe
             statusBar.Text = "Speech Recognizer is READY";
             // Stop timer
             StopTimer();
-        }*/
+        }
     }
 }
