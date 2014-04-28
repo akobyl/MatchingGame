@@ -8,12 +8,12 @@ using System.Windows.Media;
 
 namespace MatchMe
 {
-    // Drop object struct
+    // Drop objects struct
     struct dropObject
     {
         //public System.Windows.Point center;
         public Shape shape;
-        //public Brush color;        
+        public Brush color;
     }
 
     // Color object code

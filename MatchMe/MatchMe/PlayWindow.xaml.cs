@@ -195,7 +195,7 @@ namespace MatchMe
             }*/
         }
 
-        // Drop zone based objects
+        // Drop zone fixed objects
         private void DrawDropZone()
         {
             // Create drop objects
