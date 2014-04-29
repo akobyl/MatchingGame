@@ -119,7 +119,7 @@ namespace MatchMe
             var gameOptions = new Choices();
             gameOptions.Add("shape");
             gameOptions.Add("color");
-            //gameOptions.Add("both");
+            gameOptions.Add("both");
             gameOptions.Add("quit");
             // add choices to grammar builder
             grammarBuilder.Append(gameOptions);
@@ -193,7 +193,7 @@ namespace MatchMe
                     };
                     this.Close();
                     return;
-                /*case "both":
+                case "both":
                     // go to Easter egg game
                     if (newPlayWindow == null)
                     {
@@ -201,7 +201,7 @@ namespace MatchMe
                         newPlayWindow.Show();
                     };
                     this.Close();
-                    return;*/
+                    return;
                 case "quit":
                     // exit the game                    
                     stopKinect();

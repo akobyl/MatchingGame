@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 
 namespace MatchMe
@@ -25,6 +26,7 @@ namespace MatchMe
         Stream audioStream;
         SpeechRecognitionEngine speechEngine;
         RecognizerInfo recognizerInfo;
+        DispatcherTimer timer = new DispatcherTimer();
         EndWindow newEndWindow;
 
         // Drop zone objects
@@ -34,7 +36,7 @@ namespace MatchMe
         // Object array for matching
         colorObject[] testObjects;
         public enum colors { red, green, blue }
-        public enum shapes { square, circle }
+        public enum shapes { square, circle, triangle }
         int object_id = -1;
         int TEST_LENGTH = 3;
         Random random = new Random();
@@ -58,9 +60,12 @@ namespace MatchMe
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            statusBar.Text = "Play Window initialized";
-            statusBar.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
+            //status.Text = "Play Window initialized";
+            //status.Text += "\r\nsensor running: " + this.sensor.IsRunning.ToString();
+
+            // set the game title and status
             title.Content = "Match the " + gameOption + "s!";
+            status.Content = "Use your right hand to grab the object. Place it in the right bin.";
 
             // stop sensor to add new play window components
             stopKinect();
@@ -159,40 +164,6 @@ namespace MatchMe
 
             UIElementExtensions.SetGroupID(frameV, 2);
             mainCanvas.Children.Add(frameV);
-
-            /*/ Draw color or shape matching shapes
-            if (gameOption == "color")
-            {
-                for (int i = 0; i < resultZones.Length; i++)
-                {
-                    Ellipse colorCircle = new Ellipse();
-                    int size = 50;
-                    colorCircle.Height = size;
-                    colorCircle.Width = size;
-                    colorCircle.Stroke = Brushes.LightGray;
-                    colorCircle.StrokeThickness = 2;
-
-                    // TODO: create colors programmically
-                    if (i == 0)
-                    {
-                        colorCircle.Fill = Brushes.Red;
-                    }
-                    if (i == 1)
-                    {
-                        colorCircle.Fill = Brushes.Blue;
-                    }
-                    if (i == 2)
-                    {
-                        colorCircle.Fill = Brushes.Green;
-                    }
-
-                    Canvas.SetTop(colorCircle, resultZones[i].center.Y - size / 2);
-                    Canvas.SetLeft(colorCircle, resultZones[i].center.X - size / 2);
-
-                    UIElementExtensions.SetGroupID(colorCircle, 2);
-                    mainCanvas.Children.Add(colorCircle);
-                }
-            }*/
         }
 
         // Drop zone fixed objects
@@ -223,14 +194,13 @@ namespace MatchMe
             //drop_object[0].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
             drop_object[0].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
             drop_object[0].shape.SetValue(Canvas.TopProperty, 20.0);
-
             //drop_object[1].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
             drop_object[1].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
             drop_object[1].shape.SetValue(Canvas.TopProperty, 200.0);
-
             //drop_object[2].shape.SetValue(Canvas.LeftProperty, 25.0); //left-align position value
             drop_object[2].shape.SetValue(Canvas.LeftProperty, mainCanvas.Width - (140.0 + 75.0));
             drop_object[2].shape.SetValue(Canvas.TopProperty, 350.0);
+
             //Add to canvas
             UIElementExtensions.SetGroupID(drop_object[0].shape, 2);
             UIElementExtensions.SetGroupID(drop_object[1].shape, 2);
@@ -242,12 +212,10 @@ namespace MatchMe
 
         private void BuildTestObjects()
         {
-            //string status;
-            statusBar.Text += "creating test objects\n";
+            //status.Text += "creating test objects\n";
 
             // set up array of color objects
             this.testObjects = new colorObject[TEST_LENGTH];
-            //this.testObjects = new List<colorObject>();
 
             // define box where objects can appear
             int minX = 100;
@@ -261,23 +229,42 @@ namespace MatchMe
                 colors color = (colors)random.Next(0, Enum.GetNames(typeof(colors)).Length);       // get a random color
                 shapes shape = (shapes)random.Next(0, Enum.GetNames(typeof(shapes)).Length);       // get a random shape
 
-                if (shape == shapes.circle)
-                    testObjects[i].shape = new Ellipse();
-                if (shape == shapes.square)
-                    testObjects[i].shape = new Rectangle();
+                switch (shape)
+                {
+                    case (shapes.circle):
+                        testObjects[i].shape = new Ellipse();
+                        break;
+                    case (shapes.square):
+                        testObjects[i].shape = new Rectangle();
+                        break;
+                    case (shapes.triangle):
+                        var triangle = new Polygon();
+                        triangle.Points.Add(new Point(55, 30));
+                        triangle.Points.Add(new Point(0, 120));
+                        triangle.Points.Add(new Point(110, 120));
+                        testObjects[i].shape = triangle;
+                        break;
+                    default:
+                        break;
+                }
 
-                if (color == colors.red)
-                    testObjects[i].shape.Fill = Brushes.Red;
-                if (color == colors.blue)
-                    testObjects[i].shape.Fill = Brushes.Blue;
-                if (color == colors.green)
-                    testObjects[i].shape.Fill = Brushes.Green;
-                //if (color == colors.yellow)
-                //    testObjects[i].shape.Fill = Brushes.Yellow;
-
+                switch (color)
+                {
+                    case (colors.red):
+                        testObjects[i].shape.Fill = Brushes.Red;
+                        break;
+                    case (colors.blue):
+                        testObjects[i].shape.Fill = Brushes.Blue;
+                        break;
+                    case (colors.green):
+                        testObjects[i].shape.Fill = Brushes.Green;
+                        break;
+                    default:
+                        break;
+                }
 
                 // TODO: add different sizes
-                testObjects[i].size = 100;
+                testObjects[i].size = 120;
                 testObjects[i].shape.Width = testObjects[i].size;
                 testObjects[i].shape.Height = testObjects[i].size;
 
@@ -289,30 +276,14 @@ namespace MatchMe
                 Canvas.SetTop(testObjects[i].shape, testObjects[i].center.Y);
                 Canvas.SetLeft(testObjects[i].shape, testObjects[i].center.X);
 
-                testObjects[i].shape.Stroke = Brushes.Black;
+                testObjects[i].shape.Stroke = Brushes.Gray;
                 testObjects[i].shape.StrokeThickness = 2;
-
             }
 
-            statusBar.Text += "test objects created\n";
+            //status.Text += "test objects created\n";
         }
 
-        // Test function to add random object on click
-        private void add_click(object sender, RoutedEventArgs e)
-        {
-            object_id++;
-
-            if (object_id < TEST_LENGTH)
-            {
-                mainCanvas.Children.Add(testObjects[object_id].shape);
-            }
-            else
-            {
-                button_add_shape.IsEnabled = false;
-            }
-        }
-
-        private bool drawNextObject()
+        private void drawNextObject()
         {
             object_id++;
 
@@ -326,9 +297,17 @@ namespace MatchMe
                 // reset and clear all <-- important 
                 object_id = 0;
                 mainCanvas.Children.Clear();
+                // set title
+                title.Content = "Finished. Good job!";
+                // launch ending screen
+                if (newEndWindow == null)
+                {
+                    newEndWindow = new EndWindow(sensor);
+                    newEndWindow.Show();
+                };
+                // close this play window
+                this.Close();
             }
-
-            return this.finished;
         }
 
         private void quitButton_Click(object sender, RoutedEventArgs e)
@@ -354,7 +333,7 @@ namespace MatchMe
                     this.currentSkeletonID = skeleton.TrackingId;
                     int totalTrackedJoints = skeleton.Joints.Where(item => item.TrackingState == JointTrackingState.Tracked).Count();
                     string status = "\nSkeleton ID:" + this.currentSkeletonID + ", total tracked joints: " + totalTrackedJoints;
-                    this.statusBar.Text += status;
+                    //this.status.Text += status;
                 }
                 DrawSkeleton(skeleton);
             }
@@ -377,26 +356,47 @@ namespace MatchMe
                 {
                     for (int i = 0; i < resultZones.Length; i++)
                     {
+                        // if object in drop zone
                         if (resultZones[i].inZone(testObjects[object_id].center))
                         {
-                            this.statusBar.Text += "in Zone: " + i.ToString() + "\n";
-                            testObjects[object_id].center = resultZones[i].center;
-
-                            Canvas.SetTop(testObjects[object_id].shape, testObjects[object_id].center.Y - testObjects[object_id].size / 2);
-                            Canvas.SetLeft(testObjects[object_id].shape, testObjects[object_id].center.X - testObjects[object_id].size / 2);
-
-                            if (drawNextObject()) //if finished
+                            // get object shape and color
+                            Shape obj_shape = testObjects[object_id].shape;
+                            Brush obj_color = testObjects[object_id].shape.Fill;
+                            // check for marching based on game type
+                            if ((gameOption == "shape" && ((i == 0 && obj_shape is System.Windows.Shapes.Ellipse)
+                                                            || (i == 1 && obj_shape is System.Windows.Shapes.Rectangle)
+                                                            || (i == 2 && obj_shape is System.Windows.Shapes.Polygon)
+                                                         ))
+                            || (gameOption == "color" && ((i == 0 && obj_color == Brushes.Red)
+                                                            || (i == 1 && obj_color == Brushes.Green)
+                                                            || (i == 2 && obj_color == Brushes.Blue)
+                                                         ))
+                            || (gameOption == "both" && ((i == 0 && obj_shape is System.Windows.Shapes.Ellipse && obj_color == Brushes.Red
+                                                            || (i == 1 && obj_shape is System.Windows.Shapes.Rectangle && obj_color == Brushes.Green)
+                                                            || (i == 2 && obj_shape is System.Windows.Shapes.Polygon && obj_color == Brushes.Blue)
+                                                         ))
+                               ))
                             {
-                                title.Content = "Finished!";
-                                // launch ending screen
-                                if (newEndWindow == null)
-                                {
-                                    newEndWindow = new EndWindow(sensor);
-                                    newEndWindow.Show();
-                                };
-                                // close this play window
-                                this.Close();
+                                // it's a match
+                                status.Content = "That's a match!";
+                                status.Foreground = Brushes.Green;
+                                testObjects[object_id].center = resultZones[i].center;
+                                // place the object into the zone
+                                Canvas.SetTop(testObjects[object_id].shape, testObjects[object_id].center.Y - testObjects[object_id].size / 2);
+                                Canvas.SetLeft(testObjects[object_id].shape, testObjects[object_id].center.X - testObjects[object_id].size / 2);
+                                // draw the next object
+                                drawNextObject();
                             }
+
+                            else
+                            {
+                                // it's not a match
+                                status.Content = "That's NOT a match! Try another bin :)";
+                                status.Foreground = Brushes.Blue;
+                            }
+
+                            // a quick timer to clear the status                                
+                            StartTimer();
                         }
                     }
                 }
@@ -444,6 +444,7 @@ namespace MatchMe
             Line bone = new Line();
             bone.Stroke = Brushes.Blue;
             bone.StrokeThickness = 4;
+
             Point joint1 = this.ScalePosition(trackedJoint1.Position);
             bone.X1 = joint1.X;
             bone.Y1 = joint1.Y;
@@ -572,7 +573,29 @@ namespace MatchMe
                 default:
                     return;
             }
+        }
 
+        // MISC
+        private void StartTimer()
+        {
+            // Start timer
+            timer.Interval = new TimeSpan(0, 0, 3);
+            timer.Tick += timer_Tick;
+            timer.Start();
+        }
+
+        private void StopTimer()
+        {
+            timer.Stop();
+            timer.Tick -= timer_Tick;
+        }
+
+        private void timer_Tick(object sender, System.EventArgs e)
+        {
+            // Clear status
+            status.Content = "";
+            // Stop timer
+            StopTimer();
         }
 
     }

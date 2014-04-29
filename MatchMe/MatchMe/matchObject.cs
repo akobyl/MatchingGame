@@ -11,17 +11,14 @@ namespace MatchMe
     // Drop objects struct
     struct dropObject
     {
-        //public System.Windows.Point center;
         public Shape shape;
-        public Brush color;
     }
 
-    // Color object code
+    // Color objects struct
     struct colorObject
     {
         public System.Windows.Point center;
         public Shape shape;
-        public Brush color;
         public int size;
 
         // determine if the object is being grabbed by a hand
@@ -42,11 +39,10 @@ namespace MatchMe
         }
     }
 
+    // Drop zone struct
     struct resultZone
     {
         public int X1, X2, Y1, Y2;
-        public Brush color;
-        public Shape shape;
         public System.Windows.Point center;
         bool result;
 
@@ -57,15 +53,12 @@ namespace MatchMe
             {
                 result = true;
             }
-            else { result = false; }
+            else
+            {
+                result = false;
+            }
 
             return result;
         }
-
-        public bool correctAnswer()
-        {
-            return true;
-        }
-
     }
 }

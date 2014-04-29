@@ -22,7 +22,7 @@ namespace MatchMe
         PlayWindow newPlayWindow;
 
         // Timer
-        private DispatcherTimer timer = new DispatcherTimer();
+        DispatcherTimer timer = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -128,7 +128,7 @@ namespace MatchMe
             var gameOptions = new Choices();
             gameOptions.Add("shape");
             gameOptions.Add("color");
-            //gameOptions.Add("both");
+            gameOptions.Add("both");
             gameOptions.Add("quit");
             // add choices to grammar builder
             grammarBuilder.Append(gameOptions);
@@ -202,7 +202,7 @@ namespace MatchMe
                     };
                     this.Close();
                     return;
-                /*case "both":
+                case "both":
                     // go to Easter egg game
                     if (newPlayWindow == null)
                     {
@@ -210,7 +210,7 @@ namespace MatchMe
                         newPlayWindow.Show();
                     };
                     this.Close();
-                    return;*/
+                    return;
                 case "quit":
                     // exit the game                    
                     stopKinect();
@@ -239,7 +239,7 @@ namespace MatchMe
 
         private void timer_Tick(object sender, System.EventArgs e)
         {
-            // Re-enable buttons
+            // Set status
             statusBar.Text = "Speech Recognizer is READY";
             // Stop timer
             StopTimer();

@@ -5,12 +5,12 @@
         Loaded="WindowLoaded" Closing="WindowClosing" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="logo_small.png">
 
     <Grid RenderTransformOrigin="0.104,0.95">
-        <Canvas Name="mainCanvas" HorizontalAlignment="Left" Height="537" Margin="10,128,0,0" VerticalAlignment="Top" Width="996">
-            <Button Name ="button_add_shape" Click="add_click" Content="Add shape" Canvas.Left="911" Canvas.Top="505" Width="75"/>
+        <Canvas Name="mainCanvas" HorizontalAlignment="Left" Height="537" Margin="10,128,0,0" VerticalAlignment="Top" Width="996">            
         </Canvas>
-        <TextBox Name="statusBar" TextWrapping="Wrap" Text="TextBox" Canvas.Top="695" Margin="10,678,165,12"/>
+
         <Image Name="image" Margin="10,10,842,615"/>
+        <Label Name="title" Content="title" FontSize="48" FontFamily="Segoe UI Semibold" Margin="300,10,50,615" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <Button Name="quitButton" Content="Quit" Click="quitButton_Click" HorizontalAlignment="Left" Margin="856,678,0,0" VerticalAlignment="Top" Width="150" Height="50" FontFamily="Arial" FontSize="32" Background="#FFFFC000" Foreground="White" BorderBrush="White"/>
-        <Label x:Name="title" Content="title" FontSize="48" FontFamily="Segoe UI Semibold" Margin="300,10,50,615" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Name="status" Content="" FontSize="24" FontFamily="Segoe UI Semibold" Margin="10,678,0,12" HorizontalAlignment="Left" VerticalAlignment="Center" Height="50" Width="841"/>
     </Grid>
 </Window>
