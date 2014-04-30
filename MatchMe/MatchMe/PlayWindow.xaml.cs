@@ -550,7 +550,7 @@ namespace MatchMe
         {
             //wordsRecognized.Text = e.Result.Text;
             //confidenceTxt.Text = e.Result.Confidence.ToString();
-            float confidenceThreshold = 0.7f;
+            float confidenceThreshold = 0.8f;
             if (e.Result.Confidence > confidenceThreshold)
             {
                 CommandsParser(e);
