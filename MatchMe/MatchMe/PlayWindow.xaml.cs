@@ -436,6 +436,18 @@ namespace MatchMe
             drawBone(skeleton.Joints[JointType.HipRight], skeleton.Joints[JointType.KneeRight]);
             drawBone(skeleton.Joints[JointType.KneeRight], skeleton.Joints[JointType.AnkleRight]);
             drawBone(skeleton.Joints[JointType.AnkleRight], skeleton.Joints[JointType.FootRight]);
+
+            // Draw head!
+            Ellipse head = new Ellipse();
+            head.Height = 80;
+            head.Width = 50;
+            head.Fill = Brushes.Blue;
+            head.Stroke = Brushes.Black;
+            head.StrokeThickness = 2;
+            Canvas.SetLeft(head, ScalePosition(skeleton.Joints[JointType.Head].Position).X - 25);
+            Canvas.SetTop(head, ScalePosition(skeleton.Joints[JointType.Head].Position).Y - 40);
+            UIElementExtensions.SetGroupID(head, 1);
+            mainCanvas.Children.Add(head);
         }
 
         // draw single bone
